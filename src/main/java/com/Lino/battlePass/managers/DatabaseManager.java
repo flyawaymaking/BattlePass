@@ -165,6 +165,7 @@ public class DatabaseManager {
                         "name TEXT," +
                         "type TEXT," +
                         "target TEXT," +
+                        "additional_targets TEXT," +
                         "required INTEGER," +
                         "xp_reward INTEGER," +
                         "date TEXT)"
@@ -172,6 +173,15 @@ public class DatabaseManager {
 
                 if (!isMySQL) {
                     stmt.executeUpdate("CREATE INDEX IF NOT EXISTS idx_missions_uuid_date ON " + prefix + "missions(uuid, date)");
+                    try {
+                        stmt.executeUpdate("ALTER TABLE " + prefix + "daily_missions ADD COLUMN additional_targets TEXT");
+                    } catch (SQLException ignored) {
+                    }
+                } else {
+                    try {
+                        stmt.executeUpdate("ALTER TABLE " + prefix + "daily_missions ADD COLUMN additional_targets TEXT DEFAULT ''");
+                    } catch (SQLException ignored) {
+                    }
                 }
             }
         } finally {
@@ -494,9 +504,8 @@ public class DatabaseManager {
             if (missions.isEmpty()) return;
 
             String insertSql = isMySQL
-                    ? "INSERT INTO " + prefix + "daily_missions (name, type, target, required, xp_reward, date) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name)"
-                    : "INSERT OR REPLACE INTO " + prefix + "daily_missions (name, type, target, required, xp_reward, date) VALUES (?, ?, ?, ?, ?, ?)";
-
+                    ? "INSERT INTO " + prefix + "daily_missions (name, type, target, additional_targets, required, xp_reward, date) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), type=VALUES(type), target=VALUES(target), additional_targets=VALUES(additional_targets), required=VALUES(required), xp_reward=VALUES(xp_reward)"
+                    : "INSERT OR REPLACE INTO " + prefix + "daily_missions (name, type, target, additional_targets, required, xp_reward, date) VALUES (?, ?, ?, ?, ?, ?, ?)";
             Connection conn = null;
             boolean shouldClose = isMySQL;
 
