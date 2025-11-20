@@ -44,7 +44,7 @@ public class SoundManager {
                 ItemStack itemInHand = player.getInventory().getItemInMainHand();
 
                 if (customItemManager.isPremiumPassItem(itemInHand)) {
-                    float pitch = 0.8f + (float)(Math.sin(tickCounter * 0.1) * 0.2);
+                    float pitch = 0.8f + (float) (Math.sin(tickCounter * 0.1) * 0.2);
                     player.playSound(player.getLocation(), Sound.BLOCK_BEACON_AMBIENT, 0.3f, pitch);
 
                     if (tickCounter % 40 == 0) {

@@ -7,9 +7,8 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -23,18 +22,18 @@ public class BattlePassExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public String getIdentifier() {
+    public @NotNull String getIdentifier() {
         return "battlepass";
     }
 
     @Override
-    public String getAuthor() {
-        return plugin.getDescription().getAuthors().toString();
+    public @NotNull String getAuthor() {
+        return plugin.getPluginMeta().getAuthors().toString();
     }
 
     @Override
-    public String getVersion() {
-        return plugin.getDescription().getVersion();
+    public @NotNull String getVersion() {
+        return plugin.getPluginMeta().getVersion();
     }
 
     @Override
@@ -48,7 +47,7 @@ public class BattlePassExpansion extends PlaceholderExpansion {
     }
 
     @Override
-    public String onRequest(OfflinePlayer player, String identifier) {
+    public String onRequest(OfflinePlayer player, @NotNull String identifier) {
         if (player == null) {
             return "";
         }
@@ -93,7 +92,7 @@ public class BattlePassExpansion extends PlaceholderExpansion {
             case "available_rewards":
                 if (player.isOnline()) {
                     Player onlinePlayer = player.getPlayer();
-                    return String.valueOf(plugin.getRewardManager().countAvailableRewards(onlinePlayer, data));
+                    return String.valueOf(plugin.getRewardManager().countAvailableRewards(data));
                 }
                 return "0";
 
@@ -181,7 +180,8 @@ public class BattlePassExpansion extends PlaceholderExpansion {
                     return progress >= mission.required ? "Completed" : "In Progress";
                 }
             }
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
 
         return "";
     }
@@ -221,7 +221,8 @@ public class BattlePassExpansion extends PlaceholderExpansion {
 
             return Bukkit.getOfflinePlayer(topPlayer.uuid).getName();
 
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+        }
 
         return "";
     }

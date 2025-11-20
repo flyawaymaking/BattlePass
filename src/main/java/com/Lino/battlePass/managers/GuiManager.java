@@ -10,22 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GuiManager {
 
     private final BattlePass plugin;
-    private final PlayerDataManager playerDataManager;
-    private final MissionManager missionManager;
-    private final RewardManager rewardManager;
-    private final MessageManager messageManager;
-    private final ConfigManager configManager;
 
     private final Map<Integer, Integer> currentPages = new ConcurrentHashMap<>();
 
-    public GuiManager(BattlePass plugin, PlayerDataManager playerDataManager, MissionManager missionManager,
-                      RewardManager rewardManager, MessageManager messageManager, ConfigManager configManager) {
+    public GuiManager(BattlePass plugin) {
         this.plugin = plugin;
-        this.playerDataManager = playerDataManager;
-        this.missionManager = missionManager;
-        this.rewardManager = rewardManager;
-        this.messageManager = messageManager;
-        this.configManager = configManager;
     }
 
     public void openBattlePassGUI(Player player, int page) {

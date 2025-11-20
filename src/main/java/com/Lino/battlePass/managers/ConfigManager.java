@@ -6,7 +6,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class ConfigManager {
     private int dailyMissionsCount = 7;
     private int seasonDuration = 30;
     private int dailyRewardXP = 200;
-    private List<Integer> coinsDistribution = new ArrayList<>();
+    private final List<Integer> coinsDistribution = new ArrayList<>();
     private boolean shopEnabled = true;
     private boolean resetCoinsOnSeasonEnd = true;
     private int coinsDistributionHours = 24;
@@ -63,7 +62,7 @@ public class ConfigManager {
         guiSeparatorMaterial = parseMaterial(config.getString("gui.separator", "GRAY_STAINED_GLASS_PANE"), Material.GRAY_STAINED_GLASS_PANE);
 
         String freeClaimedStr = config.getString("gui.reward-claimed.free", "GREEN_STAINED_GLASS");
-        if (freeClaimedStr != null && freeClaimedStr.equalsIgnoreCase("NONE")) {
+        if (freeClaimedStr.equalsIgnoreCase("NONE")) {
             hideFreeClaimedRewards = true;
             guiFreeClaimedMaterial = null;
         } else {
@@ -72,7 +71,7 @@ public class ConfigManager {
         }
 
         String premiumClaimedStr = config.getString("gui.reward-claimed.premium", "LIME_STAINED_GLASS");
-        if (premiumClaimedStr != null && premiumClaimedStr.equalsIgnoreCase("NONE")) {
+        if (premiumClaimedStr.equalsIgnoreCase("NONE")) {
             hidePremiumClaimedRewards = true;
             guiPremiumClaimedMaterial = null;
         } else {

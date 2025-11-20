@@ -12,9 +12,7 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class ItemSerializer {
 
@@ -110,7 +108,8 @@ public class ItemSerializer {
                 for (String flag : flags) {
                     try {
                         meta.addItemFlags(ItemFlag.valueOf(flag));
-                    } catch (IllegalArgumentException ignored) {}
+                    } catch (IllegalArgumentException ignored) {
+                    }
                 }
             }
 

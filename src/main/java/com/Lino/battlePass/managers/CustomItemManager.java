@@ -15,13 +15,11 @@ import java.util.List;
 
 public class CustomItemManager {
 
-    private final BattlePass plugin;
     private final NamespacedKey premiumItemKey;
     private final NamespacedKey coinsItemKey;
     private final NamespacedKey levelItemKey;
 
     public CustomItemManager(BattlePass plugin) {
-        this.plugin = plugin;
         this.premiumItemKey = new NamespacedKey(plugin, "premium_pass_item");
         this.coinsItemKey = new NamespacedKey(plugin, "battle_coins_item");
         this.levelItemKey = new NamespacedKey(plugin, "level_boost_item");

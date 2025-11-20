@@ -5,7 +5,6 @@ import com.Lino.battlePass.gui.LevelRewardEditGui;
 import com.Lino.battlePass.gui.RewardsCategoryGui;
 import com.Lino.battlePass.gui.RewardsEditorGui;
 import com.Lino.battlePass.models.EditableReward;
-import com.Lino.battlePass.utils.GradientColorParser;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -33,12 +32,9 @@ public class RewardsEditorListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        Player player = (Player) event.getWhoClicked();
         String title = ChatColor.stripColor(event.getView().getTitle());
-
-        if (title == null) return;
 
         if (title.contains(REWARDS_EDITOR_TITLE)) {
             event.setCancelled(true);
@@ -55,16 +51,15 @@ public class RewardsEditorListener implements Listener {
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (!(event.getPlayer() instanceof Player)) return;
+        if (!(event.getPlayer() instanceof Player player)) return;
 
-        Player player = (Player) event.getPlayer();
         String title = ChatColor.stripColor(event.getView().getTitle());
 
-        if (title != null && title.contains(EDIT_LEVEL_TITLE)) {
+        if (title.contains(EDIT_LEVEL_TITLE)) {
             if (!plugin.getRewardEditorManager().hasCommandInput(player.getUniqueId())) {
                 plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
                     String newTitle = ChatColor.stripColor(player.getOpenInventory().getTitle());
-                    if (newTitle == null || !newTitle.contains(EDIT_LEVEL_TITLE)) {
+                    if (!newTitle.contains(EDIT_LEVEL_TITLE)) {
                         plugin.getRewardEditorManager().removeActiveEditor(player.getUniqueId());
                     }
                 }, 5L);
@@ -113,11 +108,12 @@ public class RewardsEditorListener implements Listener {
         String title = ChatColor.stripColor(player.getOpenInventory().getTitle());
         int currentPage = 1;
 
-        if (title != null && title.contains("Page")) {
+        if (title.contains("Page")) {
             String pageStr = title.substring(title.lastIndexOf("Page") + 5).trim();
             try {
                 currentPage = Integer.parseInt(pageStr);
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
 
         if (slot < 45) {
@@ -168,7 +164,6 @@ public class RewardsEditorListener implements Listener {
             return;
         }
 
-        int clickedSlot = event.getSlot();
         int rawSlot = event.getRawSlot();
         int inventorySize = event.getInventory().getSize();
 
@@ -200,14 +195,12 @@ public class RewardsEditorListener implements Listener {
             if (currentItem != null && currentItem.getType() != Material.AIR) {
                 editor.removeReward(rawSlot);
                 refreshEditor(player, editor);
-            }
-            else if (cursorItem != null && cursorItem.getType() != Material.AIR) {
+            } else if (cursorItem.getType() != Material.AIR) {
                 editor.addReward(new EditableReward(cursorItem.clone()));
                 event.getView().setCursor(null);
                 refreshEditor(player, editor);
             }
-        }
-        else if (rawSlot >= 36 && rawSlot < 54) {
+        } else if (rawSlot >= 36 && rawSlot < 54) {
             handleControlButtons(player, editor, rawSlot);
         }
     }
@@ -253,8 +246,6 @@ public class RewardsEditorListener implements Listener {
 
     private void refreshEditor(Player player, LevelRewardEditGui editor) {
         player.closeInventory();
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            editor.open();
-        }, 1L);
+        plugin.getServer().getScheduler().runTaskLater(plugin, editor::open, 1L);
     }
 }

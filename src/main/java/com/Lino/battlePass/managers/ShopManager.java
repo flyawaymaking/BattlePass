@@ -12,7 +12,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
 import java.util.*;
@@ -20,7 +19,6 @@ import java.util.*;
 public class ShopManager {
 
     private final BattlePass plugin;
-    private FileConfiguration shopConfig;
     private final Map<Integer, ShopItem> shopItems = new HashMap<>();
 
     public ShopManager(BattlePass plugin) {
@@ -34,7 +32,7 @@ public class ShopManager {
             plugin.saveResource("shop.yml", false);
         }
 
-        shopConfig = YamlConfiguration.loadConfiguration(shopFile);
+        FileConfiguration shopConfig = YamlConfiguration.loadConfiguration(shopFile);
         shopItems.clear();
 
         ConfigurationSection items = shopConfig.getConfigurationSection("shop-items");

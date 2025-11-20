@@ -124,7 +124,7 @@ public class RewardEditorManager {
         }
 
         if (rewards.size() == 1) {
-            EditableReward reward = rewards.get(0);
+            EditableReward reward = rewards.getFirst();
             if (reward.isCommand()) {
                 config.set(levelPath + ".command", reward.getCommand());
                 config.set(levelPath + ".display", reward.getDisplayName());

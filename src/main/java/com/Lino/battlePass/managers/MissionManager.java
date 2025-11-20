@@ -10,14 +10,12 @@ import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class MissionManager {
 
     private final BattlePass plugin;
     private final ConfigManager configManager;
     private final DatabaseManager databaseManager;
-    private final PlayerDataManager playerDataManager;
 
     private final MissionGenerator missionGenerator;
     private final MissionProgressTracker progressTracker;
@@ -30,7 +28,6 @@ public class MissionManager {
         this.plugin = plugin;
         this.configManager = configManager;
         this.databaseManager = databaseManager;
-        this.playerDataManager = playerDataManager;
 
         this.missionGenerator = new MissionGenerator(configManager);
         this.progressTracker = new MissionProgressTracker(plugin);
@@ -49,7 +46,7 @@ public class MissionManager {
                 }
 
                 if (LocalDateTime.now().isAfter(resetHandler.getSeasonEndDate())) {
-                    Bukkit.getScheduler().runTask(plugin, () -> resetSeason());
+                    Bukkit.getScheduler().runTask(plugin, this::resetSeason);
                     return;
                 }
             } else {
@@ -78,7 +75,7 @@ public class MissionManager {
                 if (resetHandler.getNextMissionReset() != null && now.isAfter(resetHandler.getNextMissionReset())) {
                     currentMissionDate = now.toLocalDate().toString();
                     databaseManager.clearOldMissionProgress(currentMissionDate);
-                    progressTracker.resetProgress(currentMissionDate);
+                    progressTracker.resetProgress();
                 }
 
                 generateDailyMissions();
@@ -106,7 +103,7 @@ public class MissionManager {
             currentMissionDate = LocalDateTime.now().toLocalDate().toString();
         }
 
-        dailyMissions = new ArrayList<>(missionGenerator.generateDailyMissions(currentMissionDate));
+        dailyMissions = new ArrayList<>(missionGenerator.generateDailyMissions());
     }
 
     public void checkMissionReset() {
@@ -123,7 +120,7 @@ public class MissionManager {
                 player.sendMessage(messageManager.getPrefix() + messageManager.getMessage("messages.mission.reset"));
             }
 
-            progressTracker.resetProgress(currentMissionDate);
+            progressTracker.resetProgress();
             databaseManager.clearOldMissionProgress(currentMissionDate);
         }
     }
@@ -140,7 +137,7 @@ public class MissionManager {
         generateDailyMissions();
         resetHandler.calculateNextReset();
         saveSeasonData();
-        progressTracker.resetProgress(currentMissionDate);
+        progressTracker.resetProgress();
     }
 
     public void forceResetSeason() {
@@ -149,7 +146,7 @@ public class MissionManager {
         generateDailyMissions();
         saveDailyMissions();
         saveSeasonData();
-        progressTracker.resetProgress(currentMissionDate);
+        progressTracker.resetProgress();
 
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (plugin.getCoinsDistributionTask() != null) {
@@ -176,7 +173,7 @@ public class MissionManager {
             player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
         }
 
-        progressTracker.resetProgress(currentMissionDate);
+        progressTracker.resetProgress();
         databaseManager.clearOldMissionProgress(currentMissionDate);
     }
 

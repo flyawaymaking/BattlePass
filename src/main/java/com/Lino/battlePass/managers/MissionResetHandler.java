@@ -94,23 +94,6 @@ public class MissionResetHandler {
         }, 20L);
     }
 
-    public void forceResetMissions() {
-        MessageManager messageManager = plugin.getMessageManager();
-
-        calculateNextReset();
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.sendMessage(messageManager.getPrefix() + messageManager.getMessage("messages.mission.admin-reset"));
-            player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
-
-            PlayerData data = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
-            if (data != null) {
-                data.missionProgress.clear();
-                plugin.getPlayerDataManager().markForSave(player.getUniqueId());
-            }
-        }
-    }
-
     public String getTimeUntilReset() {
         if (nextMissionReset == null) {
             return "Unknown";
@@ -121,8 +104,6 @@ public class MissionResetHandler {
         long minutes = ChronoUnit.MINUTES.between(now, nextMissionReset) % 60;
 
         MessageManager messageManager = plugin.getMessageManager();
-        String hourStr = hours == 1 ? messageManager.getMessage("time.hour") : messageManager.getMessage("time.hours");
-        String minuteStr = minutes == 1 ? messageManager.getMessage("time.minute") : messageManager.getMessage("time.minutes");
 
         return messageManager.getMessage("time.hours-minutes", "%hours%", String.valueOf(hours),
                 "%minutes%", String.valueOf(minutes));
@@ -138,8 +119,6 @@ public class MissionResetHandler {
         long hours = ChronoUnit.HOURS.between(now, seasonEndDate) % 24;
 
         MessageManager messageManager = plugin.getMessageManager();
-        String dayStr = days == 1 ? messageManager.getMessage("time.day") : messageManager.getMessage("time.days");
-        String hourStr = hours == 1 ? messageManager.getMessage("time.hour") : messageManager.getMessage("time.hours");
 
         return messageManager.getMessage("time.days-hours", "%days%", String.valueOf(days),
                 "%hours%", String.valueOf(hours));
@@ -158,8 +137,6 @@ public class MissionResetHandler {
         long minutes = ChronoUnit.MINUTES.between(now, nextAvailable) % 60;
 
         MessageManager messageManager = plugin.getMessageManager();
-        String hourStr = hours == 1 ? messageManager.getMessage("time.hour") : messageManager.getMessage("time.hours");
-        String minuteStr = minutes == 1 ? messageManager.getMessage("time.minute") : messageManager.getMessage("time.minutes");
 
         return messageManager.getMessage("time.hours-minutes", "%hours%", String.valueOf(hours),
                 "%minutes%", String.valueOf(minutes));

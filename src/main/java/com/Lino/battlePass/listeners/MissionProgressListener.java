@@ -57,8 +57,6 @@ public class MissionProgressListener implements Listener {
         Location from = event.getFrom();
         Location to = event.getTo();
 
-        if (to == null) return;
-
         if (from.getWorld() == null || to.getWorld() == null ||
                 !from.getWorld().equals(to.getWorld()) ||
                 from.distance(to) > 100) {
@@ -92,7 +90,7 @@ public class MissionProgressListener implements Listener {
                 if (distance >= 1 && distance < 100) {
                     plugin.getMissionManager().progressMission(player, "WALK_DISTANCE", "ANY", (int) distance);
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException ignored) {
             }
             lastLocations.put(uuid, toLoc);
         } else {
@@ -107,21 +105,18 @@ public class MissionProgressListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Player) {
-            Player player = (Player) event.getDamager();
+        if (event.getDamager() instanceof Player player) {
             plugin.getMissionManager().progressMission(player, "DAMAGE_DEALT", "ANY", (int) event.getDamage());
         }
 
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
+        if (event.getEntity() instanceof Player player) {
             plugin.getMissionManager().progressMission(player, "DAMAGE_TAKEN", "ANY", (int) event.getDamage());
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityBreed(EntityBreedEvent event) {
-        if (event.getBreeder() instanceof Player) {
-            Player player = (Player) event.getBreeder();
+        if (event.getBreeder() instanceof Player player) {
             String entityType = event.getEntity().getType().name();
             plugin.getMissionManager().progressMission(player, "BREED_ANIMAL", entityType, 1);
         }
@@ -129,8 +124,7 @@ public class MissionProgressListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityTame(EntityTameEvent event) {
-        if (event.getOwner() instanceof Player) {
-            Player player = (Player) event.getOwner();
+        if (event.getOwner() instanceof Player player) {
             String entityType = event.getEntity().getType().name();
             plugin.getMissionManager().progressMission(player, "TAME_ANIMAL", entityType, 1);
         }
@@ -153,8 +147,7 @@ public class MissionProgressListener implements Listener {
     public void onPlayerFish(PlayerFishEvent event) {
         if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH && event.getCaught() != null) {
             Player player = event.getPlayer();
-            if (event.getCaught() instanceof org.bukkit.entity.Item) {
-                org.bukkit.entity.Item item = (org.bukkit.entity.Item) event.getCaught();
+            if (event.getCaught() instanceof org.bukkit.entity.Item item) {
                 String itemType = item.getItemStack().getType().name();
                 plugin.getMissionManager().progressMission(player, "FISH_ITEM", itemType, 1);
             }
@@ -163,12 +156,11 @@ public class MissionProgressListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onCraftItem(CraftItemEvent event) {
-        if (!(event.getWhoClicked() instanceof Player)) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        Player player = (Player) event.getWhoClicked();
         ItemStack result = event.getRecipe().getResult();
 
-        if (result == null || result.getType() == Material.AIR) return;
+        if (result.getType() == Material.AIR) return;
 
         String itemType = result.getType().name();
         int crafted = result.getAmount();
@@ -199,11 +191,7 @@ public class MissionProgressListener implements Listener {
         Location blockLoc = event.getBlock().getLocation();
         UUID uuid = player.getUniqueId();
 
-        Map<Location, Long> playerPlacedBlocks = recentlyPlacedBlocks.get(uuid);
-        if (playerPlacedBlocks == null) {
-            playerPlacedBlocks = new HashMap<>();
-            recentlyPlacedBlocks.put(uuid, playerPlacedBlocks);
-        }
+        Map<Location, Long> playerPlacedBlocks = recentlyPlacedBlocks.computeIfAbsent(uuid, k -> new HashMap<>());
 
         Long lastPlaced = playerPlacedBlocks.get(blockLoc);
         long currentTime = System.currentTimeMillis();

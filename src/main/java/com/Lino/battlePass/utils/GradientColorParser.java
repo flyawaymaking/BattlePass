@@ -1,7 +1,6 @@
 package com.Lino.battlePass.utils;
 
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 
 import java.awt.Color;
 import java.util.regex.Matcher;
@@ -38,7 +37,7 @@ public class GradientColorParser {
         }
 
         Matcher matcher = GRADIENT_PATTERN.matcher(message);
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         while (matcher.find()) {
             String startHex = matcher.group(1);
@@ -59,7 +58,7 @@ public class GradientColorParser {
         }
 
         Matcher matcher = HEX_PATTERN.matcher(message);
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         while (matcher.find()) {
             String hex = matcher.group(1);

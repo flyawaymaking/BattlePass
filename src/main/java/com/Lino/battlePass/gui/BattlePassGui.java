@@ -5,7 +5,6 @@ import com.Lino.battlePass.models.PlayerData;
 import com.Lino.battlePass.models.Reward;
 import com.Lino.battlePass.utils.GradientColorParser;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -183,7 +182,7 @@ public class BattlePassGui extends BaseGui {
 
         for (String line : plugin.getMessageManager().getMessagesConfig().getStringList(configPath + ".lore-footer")) {
             String processedLine = line
-                    .replace("%level%", String.valueOf(rewards.get(0).level))
+                    .replace("%level%", String.valueOf(rewards.getFirst().level))
                     .replace("%season_time%", plugin.getMissionManager().getTimeUntilSeasonEnd());
             lore.add(GradientColorParser.parse(processedLine));
         }

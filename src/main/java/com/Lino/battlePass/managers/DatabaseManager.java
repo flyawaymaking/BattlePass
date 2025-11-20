@@ -68,11 +68,11 @@ public class DatabaseManager {
                 );
                 try {
                     stmt.executeUpdate("ALTER TABLE players ADD COLUMN battle_coins INTEGER DEFAULT 0");
-                } catch (SQLException e) {
+                } catch (SQLException ignored) {
                 }
                 try {
                     stmt.executeUpdate("ALTER TABLE players ADD COLUMN exclude_from_top INTEGER DEFAULT 0");
-                } catch (SQLException e) {
+                } catch (SQLException ignored) {
                 }
 
                 stmt.executeUpdate(
@@ -94,7 +94,7 @@ public class DatabaseManager {
                 );
                 try {
                     stmt.executeUpdate("ALTER TABLE season_data ADD COLUMN next_coins_distribution TEXT");
-                } catch (SQLException e) {
+                } catch (SQLException ignored) {
                 }
 
                 stmt.executeUpdate(

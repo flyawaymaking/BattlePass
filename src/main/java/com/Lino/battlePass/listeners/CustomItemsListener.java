@@ -166,7 +166,7 @@ public class CustomItemsListener implements Listener {
         }
 
         if (levelsGained > 0) {
-            int available = plugin.getRewardManager().countAvailableRewards(player, data);
+            int available = plugin.getRewardManager().countAvailableRewards(data);
             if (available > 0) {
                 player.sendMessage(plugin.getMessageManager().getPrefix() +
                         plugin.getMessageManager().getMessage("messages.new-rewards"));
@@ -192,8 +192,7 @@ public class CustomItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getPlayer() instanceof Player) {
-            Player player = (Player) event.getPlayer();
+        if (event.getPlayer() instanceof Player player) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 plugin.getSoundManager().checkAndUpdateSound(player);
             }, 1L);
@@ -210,8 +209,7 @@ public class CustomItemsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerPickupItem(EntityPickupItemEvent event) {
-        if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
+        if (event.getEntity() instanceof Player player) {
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 plugin.getSoundManager().checkAndUpdateSound(player);
             }, 1L);

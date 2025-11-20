@@ -76,7 +76,8 @@ public class LeaderboardGui extends BaseGui {
                     if (i == 0) rank = plugin.getMessageManager().getMessage("items.leaderboard-rank.first");
                     else if (i == 1) rank = plugin.getMessageManager().getMessage("items.leaderboard-rank.second");
                     else if (i == 2) rank = plugin.getMessageManager().getMessage("items.leaderboard-rank.third");
-                    else rank = plugin.getMessageManager().getMessage("items.leaderboard-rank.other", "%rank%", String.valueOf(i + 1));
+                    else
+                        rank = plugin.getMessageManager().getMessage("items.leaderboard-rank.other", "%rank%", String.valueOf(i + 1));
 
                     skullMeta.setDisplayName(plugin.getMessageManager().getMessage("items.leaderboard-player.name",
                             "%rank%", rank, "%player%", playerName));

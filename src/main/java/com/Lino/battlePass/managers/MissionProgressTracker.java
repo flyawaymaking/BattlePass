@@ -56,7 +56,7 @@ public class MissionProgressTracker {
             data.missionProgress.put(missionKey, newProgress);
             changed = true;
 
-            if (newProgress >= mission.required && currentProgress < mission.required) {
+            if (newProgress >= mission.required) {
                 completedKeys.add(missionKey);
 
                 data.xp += mission.xpReward;
@@ -82,7 +82,7 @@ public class MissionProgressTracker {
         return mission.type + "_" + mission.target + "_" + mission.required;
     }
 
-    public void resetProgress(String currentMissionDate) {
+    public void resetProgress() {
         playerCompletedMissions.clear();
         lastActionbarUpdate.clear();
 
@@ -114,7 +114,7 @@ public class MissionProgressTracker {
                     "%level%", String.valueOf(data.level)));
             player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f);
 
-            int available = plugin.getRewardManager().countAvailableRewards(player, data);
+            int available = plugin.getRewardManager().countAvailableRewards(data);
             if (available > 0) {
                 player.sendMessage(messageManager.getPrefix() + messageManager.getMessage("messages.new-rewards"));
             }
@@ -162,15 +162,12 @@ public class MissionProgressTracker {
 
         sendActionBar(player, progressMessage);
 
-        int taskId = Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
-            @Override
-            public void run() {
-                Long lastUpdate = lastActionbarUpdate.getOrDefault(uuid, new HashMap<>()).get(key);
-                if (lastUpdate != null && System.currentTimeMillis() - lastUpdate >= 29500) {
-                    sendActionBar(player, "");
-                    playerTasks.remove(key);
-                    lastActionbarUpdate.get(uuid).remove(key);
-                }
+        int taskId = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            Long lastUpdate = lastActionbarUpdate.getOrDefault(uuid, new HashMap<>()).get(key);
+            if (lastUpdate != null && System.currentTimeMillis() - lastUpdate >= 29500) {
+                sendActionBar(player, "");
+                playerTasks.remove(key);
+                lastActionbarUpdate.get(uuid).remove(key);
             }
         }, 600L).getTaskId();
 
