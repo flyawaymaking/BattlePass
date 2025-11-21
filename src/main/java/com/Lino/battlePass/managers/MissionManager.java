@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class MissionManager {
 
@@ -20,6 +21,7 @@ public class MissionManager {
     private final MissionGenerator missionGenerator;
     private final MissionProgressTracker progressTracker;
     private final MissionResetHandler resetHandler;
+    private boolean missionsInitialised = false;
 
     private volatile List<Mission> dailyMissions = Collections.synchronizedList(new ArrayList<>());
     private String currentMissionDate;
@@ -35,62 +37,75 @@ public class MissionManager {
     }
 
     public void initialize() {
-        databaseManager.loadSeasonData().thenAccept(data -> {
-            if (data.containsKey("endDate")) {
-                resetHandler.setSeasonEndDate((LocalDateTime) data.get("endDate"));
-                if (data.containsKey("missionResetTime")) {
-                    resetHandler.setNextMissionReset((LocalDateTime) data.get("missionResetTime"));
-                }
-                if (data.containsKey("currentMissionDate")) {
-                    currentMissionDate = (String) data.get("currentMissionDate");
-                }
-
-                if (LocalDateTime.now().isAfter(resetHandler.getSeasonEndDate())) {
-                    Bukkit.getScheduler().runTask(plugin, this::resetSeason);
-                    return;
-                }
-            } else {
-                resetHandler.setSeasonEndDate(LocalDateTime.now().plusDays(configManager.getSeasonDuration()));
-                currentMissionDate = LocalDateTime.now().toLocalDate().toString();
-                resetHandler.calculateNextReset();
-                saveSeasonData();
-            }
-
-            loadMissionsAfterSeasonData();
-        });
+        databaseManager.loadSeasonData()
+                .thenApply(this::handleSeasonData)
+                .thenCompose(v -> databaseManager.loadDailyMissions())
+                .thenCompose(this::handleDailyMissions)
+                .whenComplete((v, ex) -> {
+                    if (ex != null) {
+                        ex.printStackTrace();
+                        return;
+                    }
+                    missionsInitialised = true;
+                });
     }
 
-    private void loadMissionsAfterSeasonData() {
-        databaseManager.loadDailyMissions().thenAccept(missions -> {
-            LocalDateTime now = LocalDateTime.now();
+    private Void handleSeasonData(Map<String, Object> data) {
+        if (data.containsKey("endDate")) {
 
-            if (currentMissionDate == null) {
+            resetHandler.setSeasonEndDate((LocalDateTime) data.get("endDate"));
+
+            if (data.containsKey("missionResetTime"))
+                resetHandler.setNextMissionReset((LocalDateTime) data.get("missionResetTime"));
+
+            if (data.containsKey("currentMissionDate"))
+                currentMissionDate = (String) data.get("currentMissionDate");
+
+            if (LocalDateTime.now().isAfter(resetHandler.getSeasonEndDate())) {
+                Bukkit.getScheduler().runTask(plugin, this::resetSeason);
+                return null;
+            }
+
+        } else {
+            resetHandler.setSeasonEndDate(LocalDateTime.now().plusDays(configManager.getSeasonDuration()));
+            currentMissionDate = LocalDateTime.now().toLocalDate().toString();
+            resetHandler.calculateNextReset();
+            saveSeasonData();
+        }
+        return null;
+    }
+
+    private CompletableFuture<Void> handleDailyMissions(List<Mission> missions) {
+        LocalDateTime now = LocalDateTime.now();
+        if (currentMissionDate == null)
+            currentMissionDate = now.toLocalDate().toString();
+
+        boolean needNew = missions.isEmpty() ||
+                (resetHandler.getNextMissionReset() != null && now.isAfter(resetHandler.getNextMissionReset()));
+
+        if (needNew) {
+            if (resetHandler.getNextMissionReset() != null && now.isAfter(resetHandler.getNextMissionReset())) {
                 currentMissionDate = now.toLocalDate().toString();
+                databaseManager.clearOldMissionProgress(currentMissionDate);
+                progressTracker.resetProgress();
             }
 
-            boolean needNewMissions = missions.isEmpty() ||
-                    (resetHandler.getNextMissionReset() != null && now.isAfter(resetHandler.getNextMissionReset()));
+            generateDailyMissions();
+            resetHandler.calculateNextReset();
+            saveDailyMissions();
+            saveSeasonData();
 
-            if (needNewMissions) {
-                if (resetHandler.getNextMissionReset() != null && now.isAfter(resetHandler.getNextMissionReset())) {
-                    currentMissionDate = now.toLocalDate().toString();
-                    databaseManager.clearOldMissionProgress(currentMissionDate);
-                    progressTracker.resetProgress();
-                }
+            return CompletableFuture.completedFuture(null);
+        }
 
-                generateDailyMissions();
-                resetHandler.calculateNextReset();
-                saveDailyMissions();
-                saveSeasonData();
-            } else {
-                dailyMissions = new ArrayList<>(missions);
+        dailyMissions = new ArrayList<>(missions);
 
-                if (resetHandler.getNextMissionReset() == null) {
-                    resetHandler.calculateNextReset();
-                    saveSeasonData();
-                }
-            }
-        });
+        if (resetHandler.getNextMissionReset() == null) {
+            resetHandler.calculateNextReset();
+            saveSeasonData();
+        }
+
+        return CompletableFuture.completedFuture(null);
     }
 
     public void recalculateResetTimeOnReload() {
@@ -232,6 +247,6 @@ public class MissionManager {
     }
 
     public boolean isInitialized() {
-        return currentMissionDate != null && !dailyMissions.isEmpty();
+        return missionsInitialised;
     }
 }
