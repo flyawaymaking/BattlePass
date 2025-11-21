@@ -1,7 +1,6 @@
 package com.Lino.battlePass.managers;
 
 import com.Lino.battlePass.BattlePass;
-import com.Lino.battlePass.models.PlayerData;
 import com.Lino.battlePass.tasks.CoinsDistributionTask;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;

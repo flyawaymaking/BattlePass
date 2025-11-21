@@ -16,8 +16,7 @@ public class MythicMobsListener implements Listener {
 
     @EventHandler
     public void onMythicMobDeath(MythicMobDeathEvent event) {
-        if (event.getKiller() instanceof Player) {
-            Player player = (Player) event.getKiller();
+        if (event.getKiller() instanceof Player player) {
             // Ottiene l'Internal Name del mob (es. "SkeletonKing")
             String mobInternalName = event.getMobType().getInternalName();
 

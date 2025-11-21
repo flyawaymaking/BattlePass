@@ -189,7 +189,7 @@ public class MissionManager {
         }
 
         progressTracker.resetProgress();
-        databaseManager.clearOldMissionProgress(currentMissionDate);
+        databaseManager.clearOldMissionProgress(LocalDateTime.now().plusDays(1).toLocalDate().toString());
     }
 
     public void progressMission(Player player, String type, String target, int amount) {
