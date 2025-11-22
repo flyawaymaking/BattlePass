@@ -14,6 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class RewardManager {
 
@@ -23,6 +25,9 @@ public class RewardManager {
     private final Map<Integer, List<Reward>> freeRewardsByLevel = new HashMap<>();
     private final Map<Integer, List<Reward>> premiumRewardsByLevel = new HashMap<>();
 
+    private int maxLevel = 54;
+    private static final Pattern LEVEL_PATTERN = Pattern.compile("level-(\\d+)");
+
     public RewardManager(BattlePass plugin, ConfigManager configManager) {
         this.plugin = plugin;
         this.configManager = configManager;
@@ -31,13 +36,19 @@ public class RewardManager {
     public void loadRewards() {
         freeRewardsByLevel.clear();
         premiumRewardsByLevel.clear();
+
         FileConfiguration freeConfig = configManager.getBattlePassFreeConfig();
         FileConfiguration premiumConfig = configManager.getBattlePassPremiumConfig();
 
-        for (int i = 1; i <= plugin.getConfigManager().getMaxRewardsLevel(); i++) {
+        maxLevel = 54;
+        updateMaxLevel(freeConfig);
+        updateMaxLevel(premiumConfig);
+
+        for (int i = 1; i <= maxLevel; i++) {
             String levelPath = "level-" + i;
             List<Reward> freeLevel = new ArrayList<>();
             List<Reward> premiumLevel = new ArrayList<>();
+
             if (freeConfig.contains(levelPath)) {
                 if (freeConfig.contains(levelPath + ".material") || freeConfig.contains(levelPath + ".command")) {
                     Reward reward = loadSingleReward(freeConfig, levelPath, i, true);
@@ -56,7 +67,6 @@ public class RewardManager {
 
             if (premiumConfig.contains(levelPath)) {
                 if (premiumConfig.contains(levelPath + ".material") || premiumConfig.contains(levelPath + ".command")) {
-
                     Reward reward = loadSingleReward(premiumConfig, levelPath, i, false);
                     if (reward != null) {
                         premiumLevel.add(reward);
@@ -73,6 +83,20 @@ public class RewardManager {
 
             if (!freeLevel.isEmpty()) freeRewardsByLevel.put(i, freeLevel);
             if (!premiumLevel.isEmpty()) premiumRewardsByLevel.put(i, premiumLevel);
+        }
+    }
+
+    private void updateMaxLevel(FileConfiguration config) {
+        for (String key : config.getKeys(false)) {
+            Matcher matcher = LEVEL_PATTERN.matcher(key);
+            if (matcher.matches()) {
+                try {
+                    int level = Integer.parseInt(matcher.group(1));
+                    if (level > maxLevel) {
+                        maxLevel = level;
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
         }
     }
 
@@ -232,6 +256,10 @@ public class RewardManager {
 
     public Map<Integer, List<Reward>> getPremiumRewardsByLevel() {
         return premiumRewardsByLevel;
+    }
+
+    public int getMaxLevel() {
+        return maxLevel;
     }
 
     public List<EditableReward> getEditableRewards(int level, boolean isPremium) {

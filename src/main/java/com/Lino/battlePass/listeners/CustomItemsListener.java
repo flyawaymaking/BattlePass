@@ -116,10 +116,7 @@ public class CustomItemsListener implements Listener {
             return;
         }
 
-        int maxLevel = plugin.getConfigManager().getMaxRewardsLevel();
-        int amount = itemInHand.getAmount();
-        int totalXP = amount * 100;
-
+        int maxLevel = plugin.getRewardManager().getMaxLevel();
         PlayerData data = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
 
         if (data.level >= maxLevel) {
@@ -128,6 +125,9 @@ public class CustomItemsListener implements Listener {
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             return;
         }
+
+        int amount = itemInHand.getAmount();
+        int totalXP = amount * 100;
 
         player.getInventory().setItemInMainHand(null);
 

@@ -18,12 +18,14 @@ public class BattlePassGui extends BaseGui {
     private final Player player;
     private final PlayerData playerData;
     private final int page;
+    private final int maxLevel;
 
     public BattlePassGui(BattlePass plugin, Player player, int page) {
         super(plugin, plugin.getMessageManager().getMessage("gui.battlepass", "%page%", String.valueOf(page)), 54);
         this.player = player;
         this.playerData = plugin.getPlayerDataManager().getPlayerData(player.getUniqueId());
         this.page = page;
+        this.maxLevel = plugin.getRewardManager().getMaxLevel();
     }
 
     public void open() {
@@ -55,7 +57,7 @@ public class BattlePassGui extends BaseGui {
                     .replace("%xp%", String.valueOf(playerData.xp))
                     .replace("%xp_needed%", String.valueOf(plugin.getConfigManager().getXpPerLevel()))
                     .replace("%premium_status%", premiumStatus)
-                    .replace("%max_level%", String.valueOf(plugin.getConfigManager().getMaxRewardsLevel()))
+                    .replace("%max_level%", String.valueOf(maxLevel))
                     .replace("%season_time%", plugin.getMissionManager().getTimeUntilSeasonEnd());
             lore.add(GradientColorParser.parse(processedLine));
         }
@@ -70,8 +72,9 @@ public class BattlePassGui extends BaseGui {
         Map<Integer, List<Reward>> premiumRewards = plugin.getRewardManager().getPremiumRewardsByLevel();
         Map<Integer, List<Reward>> freeRewards = plugin.getRewardManager().getFreeRewardsByLevel();
 
-        for (int i = 0; i <= 8 && startLevel + i <= plugin.getConfigManager().getMaxRewardsLevel(); i++) {
+        for (int i = 0; i <= 8; i++) {
             int level = startLevel + i;
+            if (level > maxLevel) break;
 
             List<Reward> premiumLevel = premiumRewards.get(level);
             if (premiumLevel != null && !premiumLevel.isEmpty()) {
@@ -207,7 +210,8 @@ public class BattlePassGui extends BaseGui {
             gui.setItem(45, createNavigationItem(false, page - 1));
         }
 
-        if (page < plugin.getConfigManager().getMaxPage()) {
+        int maxPages = (int) Math.ceil(maxLevel / 9.0);
+        if (page < maxPages) {
             gui.setItem(53, createNavigationItem(true, page + 1));
         }
     }

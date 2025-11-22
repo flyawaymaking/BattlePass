@@ -27,13 +27,7 @@ public class GuiClickListener implements Listener {
         String title = event.getView().getTitle();
         Player player = (Player) event.getWhoClicked();
 
-        boolean isBattlePassGUI = false;
-        for (int i = 1; i <= plugin.getConfigManager().getMaxPage(); i++) {
-            if (title.equals(plugin.getMessageManager().getMessage("gui.battlepass", "%page%", String.valueOf(i)))) {
-                isBattlePassGUI = true;
-                break;
-            }
-        }
+        boolean isBattlePassGUI = title.startsWith(plugin.getMessageManager().getMessage("gui.battlepass").split("%")[0]);
 
         if (!isBattlePassGUI && !title.equals(plugin.getMessageManager().getMessage("gui.leaderboard")) &&
                 !title.equals(plugin.getMessageManager().getMessage("gui.missions")) &&
@@ -75,6 +69,10 @@ public class GuiClickListener implements Listener {
                     plugin.getGuiManager().openMissionsGUI(player);
                 }, 20L);
             }
+        } else if (clicked.getType() == Material.WRITABLE_BOOK && slot == 53) {
+            if (player.hasPermission("battlepass.admin")) {
+                plugin.getMissionEditorManager().openMissionEditor(player, 1);
+            }
         }
     }
 
@@ -85,9 +83,15 @@ public class GuiClickListener implements Listener {
             var meta = clicked.getItemMeta();
             if (meta.getPersistentDataContainer().has(plugin.getEventManager().getNavigationKey(), PersistentDataType.STRING)) {
                 String action = meta.getPersistentDataContainer().get(plugin.getEventManager().getNavigationKey(), PersistentDataType.STRING);
+
+                // Calcolo dinamico delle pagine massime
+                int maxLevel = plugin.getRewardManager().getMaxLevel();
+                int maxPages = (int) Math.ceil(maxLevel / 9.0);
+                if (maxPages < 1) maxPages = 1;
+
                 if ("previous".equals(action) && currentPage > 1) {
                     plugin.getGuiManager().openBattlePassGUI(player, currentPage - 1);
-                } else if ("next".equals(action) && currentPage < plugin.getConfigManager().getMaxPage()) {
+                } else if ("next".equals(action) && currentPage < maxPages) {
                     plugin.getGuiManager().openBattlePassGUI(player, currentPage + 1);
                 }
                 return;
@@ -193,8 +197,9 @@ public class GuiClickListener implements Listener {
             data.lastDailyReward = now;
 
             int xpPerLevel = plugin.getConfigManager().getXpPerLevel();
+            int maxLevel = plugin.getRewardManager().getMaxLevel();
 
-            while (data.xp >= xpPerLevel && data.level < plugin.getConfigManager().getMaxRewardsLevel()) {
+            while (data.xp >= xpPerLevel && data.level < maxLevel) {
                 data.xp -= xpPerLevel;
                 data.level++;
                 data.totalLevels++;
