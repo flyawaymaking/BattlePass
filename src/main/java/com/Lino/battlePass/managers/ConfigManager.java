@@ -28,7 +28,6 @@ public class ConfigManager {
     private int coinsDistributionHours = 24;
     private int missionResetHours = 24;
     private boolean customItemSoundsEnabled = true;
-    private int maxRewardsLevel = 54;
 
     private Material guiFreeLockedMaterial = Material.GRAY_STAINED_GLASS;
     private Material guiPremiumLockedMaterial = Material.GRAY_STAINED_GLASS;
@@ -56,7 +55,6 @@ public class ConfigManager {
 
     public void reload() {
         config = plugin.getConfig();
-        maxRewardsLevel = config.getInt("max-rewards-level", 54);
         xpPerLevel = config.getInt("experience.xp-per-level", 200);
         seasonDuration = config.getInt("season.duration", 30);
         dailyRewardXP = config.getInt("daily-reward.xp", 200);
@@ -235,15 +233,6 @@ public class ConfigManager {
 
     public boolean shouldCheckUpdates() {
         return config.getBoolean("check-updates", true);
-    }
-
-    public int getMaxRewardsLevel() {
-        return maxRewardsLevel;
-    }
-
-    public int getMaxPage() {
-        int max = getMaxRewardsLevel();
-        return (int) Math.ceil(max / 9.0);
     }
 
     public String getDatabaseType() {

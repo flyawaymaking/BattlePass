@@ -28,7 +28,7 @@ public class RewardsEditorGui extends BaseGui {
         }
 
         Inventory gui = createInventory();
-        String maxLevel = String.valueOf(plugin.getConfigManager().getMaxRewardsLevel());
+        String maxLevel = String.valueOf(plugin.getRewardManager().getMaxLevel());
 
         ItemStack freeRewards = new ItemStack(Material.CHEST);
         ItemMeta freeMeta = freeRewards.getItemMeta();
