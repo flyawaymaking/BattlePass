@@ -210,8 +210,7 @@ public class BattlePassGui extends BaseGui {
             gui.setItem(45, createNavigationItem(false, page - 1));
         }
 
-        int maxPages = (int) Math.ceil(maxLevel / 9.0);
-        if (page < maxPages) {
+        if (page < plugin.getRewardManager().getMaxPage()) {
             gui.setItem(53, createNavigationItem(true, page + 1));
         }
     }

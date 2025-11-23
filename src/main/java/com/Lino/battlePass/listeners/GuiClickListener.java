@@ -84,9 +84,7 @@ public class GuiClickListener implements Listener {
             if (meta.getPersistentDataContainer().has(plugin.getEventManager().getNavigationKey(), PersistentDataType.STRING)) {
                 String action = meta.getPersistentDataContainer().get(plugin.getEventManager().getNavigationKey(), PersistentDataType.STRING);
 
-                // Calcolo dinamico delle pagine massime
-                int maxLevel = plugin.getRewardManager().getMaxLevel();
-                int maxPages = (int) Math.ceil(maxLevel / 9.0);
+                int maxPages = plugin.getRewardManager().getMaxPage();
                 if (maxPages < 1) maxPages = 1;
 
                 if ("previous".equals(action) && currentPage > 1) {

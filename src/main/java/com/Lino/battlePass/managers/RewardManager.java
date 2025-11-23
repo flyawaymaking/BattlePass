@@ -95,7 +95,8 @@ public class RewardManager {
                     if (level > maxLevel) {
                         maxLevel = level;
                     }
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
     }
@@ -260,6 +261,10 @@ public class RewardManager {
 
     public int getMaxLevel() {
         return maxLevel;
+    }
+
+    public int getMaxPage() {
+        return (int) Math.ceil(getMaxLevel() / 9.0);
     }
 
     public List<EditableReward> getEditableRewards(int level, boolean isPremium) {

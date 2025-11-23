@@ -217,8 +217,7 @@ public class BattlePass extends JavaPlugin {
             String title = player.getOpenInventory().getTitle();
             boolean isBattlePassGUI = false;
             int currentPage = 1;
-            int maxPages = (int) Math.ceil(rewardManager.getMaxLevel() / 9.0);
-            for (int i = 1; i <= maxPages; i++) {
+            for (int i = 1; i <= rewardManager.getMaxPage(); i++) {
                 if (title.equals(messageManager.getMessage("gui.battlepass", "%page%", String.valueOf(i)))) {
                     isBattlePassGUI = true;
                     currentPage = i;
