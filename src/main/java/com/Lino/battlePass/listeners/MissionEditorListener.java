@@ -1,6 +1,7 @@
 package com.Lino.battlePass.listeners;
 
 import com.Lino.battlePass.BattlePass;
+import com.Lino.battlePass.gui.BaseHolder;
 import com.Lino.battlePass.managers.MissionEditorManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -37,8 +38,13 @@ public class MissionEditorListener implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!BaseHolder.isBattlePassInventory(event.getView().getTopInventory())) return;
+
+        if (!(event.getWhoClicked() instanceof Player)) return;
+        Player player = (Player) event.getWhoClicked();
         String title = ChatColor.stripColor(event.getView().getTitle());
+
+        if (title == null) return;
 
         if (title.startsWith("Mission Editor")) {
             if (!title.contains("Page ")) return;

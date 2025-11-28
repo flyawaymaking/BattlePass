@@ -1,6 +1,7 @@
 package com.Lino.battlePass.listeners;
 
 import com.Lino.battlePass.BattlePass;
+import com.Lino.battlePass.gui.BaseHolder;
 import com.Lino.battlePass.gui.LevelRewardEditGui;
 import com.Lino.battlePass.gui.RewardsCategoryGui;
 import com.Lino.battlePass.gui.RewardsEditorGui;
@@ -34,7 +35,9 @@ public class RewardsEditorListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
+        if (!BaseHolder.isBattlePassInventory(event.getView().getTopInventory())) return;
+
+        if (!(event.getWhoClicked() instanceof Player)) return;
 
         String title = ChatColor.stripColor(event.getView().getTitle());
 
