@@ -20,6 +20,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
 
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -130,6 +131,20 @@ public class MissionProgressListener implements Listener {
         lastLocations.put(uuid, to);
     }
 
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+        EntityDamageEvent last = player.getLastDamageCause();
+        if (last == null) {
+            plugin.getMissionManager().progressMission(player, "DEATH", "UNKNOWN", 1);
+            return;
+        }
+
+        for (String type : enumerateDamageTypes(last)) {
+            plugin.getMissionManager().progressMission(player, "DEATH", type, 1);
+        }
+    }
+
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
@@ -149,103 +164,6 @@ public class MissionProgressListener implements Listener {
                 plugin.getMissionManager().progressMission(player, "DAMAGE_DEALT", type, amount);
             }
         }
-    }
-
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerDeath(PlayerDeathEvent event) {
-        Player player = event.getEntity();
-        EntityDamageEvent last = player.getLastDamageCause();
-        if (last == null) {
-            plugin.getMissionManager().progressMission(player, "DEATH", "UNKNOWN", 1);
-            return;
-        }
-
-        for (String type : enumerateDamageTypes(last)) {
-            plugin.getMissionManager().progressMission(player, "DEATH", type, 1);
-        }
-    }
-
-    private List<String> enumerateDamageTypes(EntityDamageEvent event) {
-        List<String> result = new ArrayList<>();
-
-        if (event instanceof EntityDamageByEntityEvent edbe) {
-            Entity rawDamager = edbe.getDamager();
-
-            if (rawDamager instanceof Projectile projectile) {
-                result.add(safeName(projectile.getType().name()));
-
-                ProjectileSource shooter = projectile.getShooter();
-                if (shooter instanceof Entity shooterEntity) {
-                    if (shooterEntity instanceof Player) {
-                        result.add("PLAYER");
-                    } else if (shooterEntity instanceof LivingEntity livingShooter) {
-                        String mobBase = safeName(livingShooter.getType().name());
-                        result.add(mobBase);
-                    } else {
-                        result.add(safeName(shooterEntity.getType().name()));
-                    }
-                }
-            } else {
-                if (rawDamager instanceof Player) {
-                    result.add("PLAYER");
-                } else if (rawDamager instanceof LivingEntity living) {
-                    result.add(safeName(living.getType().name()));
-                } else {
-                    result.add(safeName(rawDamager.getType().name()));
-                }
-            }
-        }
-
-        result.add(safeName(getCauseName(event.getCause())));
-
-        return new ArrayList<>(new LinkedHashSet<>(result));
-    }
-
-    private Entity getTrueDamager(Entity damager) {
-        if (damager instanceof Projectile projectile) {
-            ProjectileSource ps = projectile.getShooter();
-            if (ps instanceof Entity shooterEntity) return shooterEntity;
-        }
-        return damager;
-    }
-
-    private String getCauseName(EntityDamageEvent.DamageCause cause) {
-        switch (cause) {
-            case FIRE, FIRE_TICK -> {
-                return "FIRE";
-            }
-            case LAVA -> {
-                return "LAVA";
-            }
-            case FALL -> {
-                return "FALL";
-            }
-            case DROWNING -> {
-                return "DROWNING";
-            }
-            case POISON -> {
-                return "POISON";
-            }
-            case BLOCK_EXPLOSION, ENTITY_EXPLOSION -> {
-                return "EXPLOSION";
-            }
-            case VOID -> {
-                return "VOID";
-            }
-            case STARVATION -> {
-                return "STARVATION";
-            }
-            case CONTACT -> {
-                return "CONTACT";
-            }
-            default -> {
-                return cause.name();
-            }
-        }
-    }
-
-    private String safeName(String s) {
-        return s == null ? "UNKNOWN" : s.replaceAll("[^A-Z0-9_]", "_").toUpperCase();
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -271,9 +189,7 @@ public class MissionProgressListener implements Listener {
         if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
 
         if (event.getInventory().getHolder() instanceof Villager villager) {
-            String profession = villager.getProfession().key().value()
-                    .replace("minecraft:", "")
-                    .toUpperCase();
+            String profession = getProfessionName(villager);
             if (profession.equals("NONE")) profession = "VILLAGER";
 
             plugin.getMissionManager().progressMission(player, "TRADE_VILLAGER", profession, 1);
@@ -410,6 +326,91 @@ public class MissionProgressListener implements Listener {
         if (event.getEntity().getType() == EntityType.SHEEP) {
             plugin.getMissionManager().progressMission(player, "SHEAR_SHEEP", "SHEEP", 1);
         }
+    }
+
+    public String getProfessionName(Villager villager) {
+        Villager.Profession profession = villager.getProfession();
+
+        try {
+            // Old method - 'name()' is deprecated since version 1.21 and marked for removal
+            // profession.name()
+            Method nameMethod = profession.getClass().getMethod("name");
+            return (String) nameMethod.invoke(profession);
+        } catch (Exception e) {
+            // New method
+            // profession.key().value().replace("minecraft:", "").toUpperCase();
+            try {
+                Method keyMethod = profession.getClass().getMethod("key");
+                Object namespacedKey = keyMethod.invoke(profession);
+                Method valueMethod = namespacedKey.getClass().getMethod("value");
+                String keyValue = (String) valueMethod.invoke(namespacedKey);
+                return keyValue.replace("minecraft:", "").toUpperCase();
+            } catch (Exception ex) {
+                return "UNKNOWN";
+            }
+        }
+    }
+
+    private List<String> enumerateDamageTypes(EntityDamageEvent event) {
+        List<String> result = new ArrayList<>();
+
+        if (event instanceof EntityDamageByEntityEvent edbe) {
+            Entity rawDamager = edbe.getDamager();
+
+            if (rawDamager instanceof Projectile projectile) {
+                result.add(safeName(projectile.getType().name()));
+
+                ProjectileSource shooter = projectile.getShooter();
+                if (shooter instanceof Entity shooterEntity) {
+                    if (shooterEntity instanceof Player) {
+                        result.add("PLAYER");
+                    } else if (shooterEntity instanceof LivingEntity livingShooter) {
+                        String mobBase = safeName(livingShooter.getType().name());
+                        result.add(mobBase);
+                    } else {
+                        result.add(safeName(shooterEntity.getType().name()));
+                    }
+                }
+            } else {
+                if (rawDamager instanceof Player) {
+                    result.add("PLAYER");
+                } else if (rawDamager instanceof LivingEntity living) {
+                    result.add(safeName(living.getType().name()));
+                } else {
+                    result.add(safeName(rawDamager.getType().name()));
+                }
+            }
+        }
+
+        result.add(safeName(getCauseName(event.getCause())));
+
+        return new ArrayList<>(new LinkedHashSet<>(result));
+    }
+
+    private Entity getTrueDamager(Entity damager) {
+        if (damager instanceof Projectile projectile) {
+            ProjectileSource ps = projectile.getShooter();
+            if (ps instanceof Entity shooterEntity) return shooterEntity;
+        }
+        return damager;
+    }
+
+    private String getCauseName(EntityDamageEvent.DamageCause cause) {
+        switch (cause) {
+            case FIRE, FIRE_TICK -> {
+                return "FIRE";
+            }
+            case BLOCK_EXPLOSION, ENTITY_EXPLOSION -> {
+                return "EXPLOSION";
+            }
+            default -> {
+                return cause.name();
+            }
+        }
+    }
+
+    private String safeName(String s) {
+        return s == null ? "UNKNOWN" : s.replaceAll("[^A-Z0-9_]", "_").toUpperCase();
     }
 
     public void initializePlayerLocation(UUID uuid, Location location) {
