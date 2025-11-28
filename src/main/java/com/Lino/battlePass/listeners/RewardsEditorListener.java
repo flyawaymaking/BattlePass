@@ -12,7 +12,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
@@ -57,7 +56,7 @@ public class RewardsEditorListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player)) return;
 
         String title = ChatColor.stripColor(event.getView().getTitle());
-        if (title != null && title.startsWith(EDIT_LEVEL_START) && title.endsWith(EDIT_LEVEL_END)) {
+        if (title.startsWith(EDIT_LEVEL_START) && title.endsWith(EDIT_LEVEL_END)) {
             boolean topInventory = false;
             for (int slot : event.getRawSlots()) {
                 if (slot < event.getInventory().getSize()) {
@@ -229,7 +228,7 @@ public class RewardsEditorListener implements Listener {
                 return;
             }
 
-            boolean hasCursorItem = cursorItem != null && cursorItem.getType() != Material.AIR;
+            boolean hasCursorItem = cursorItem.getType() != Material.AIR;
             boolean hasCurrentItem = currentItem != null && currentItem.getType() != Material.AIR;
 
             if (hasCurrentItem) {
@@ -290,8 +289,6 @@ public class RewardsEditorListener implements Listener {
     }
 
     private void refreshEditor(Player player, LevelRewardEditGui editor) {
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
-            editor.open();
-        });
+        plugin.getServer().getScheduler().runTask(plugin, editor::open);
     }
 }

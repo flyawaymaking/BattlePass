@@ -23,7 +23,7 @@ public class ConfigManager {
     private String seasonResetType = "DURATION";
     private int seasonDuration = 30;
     private int dailyRewardXP = 200;
-    private List<Integer> coinsDistribution = new ArrayList<>();
+    private final List<Integer> coinsDistribution = new ArrayList<>();
     private boolean shopEnabled = true;
     private boolean resetCoinsOnSeasonEnd = true;
     private int coinsDistributionHours = 24;

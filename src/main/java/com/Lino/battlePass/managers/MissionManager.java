@@ -14,7 +14,6 @@ import java.util.*;
 public class MissionManager {
 
     private final BattlePass plugin;
-    private final ConfigManager configManager;
     private final DatabaseManager databaseManager;
 
     private final MissionGenerator missionGenerator;
@@ -26,7 +25,6 @@ public class MissionManager {
 
     public MissionManager(BattlePass plugin, ConfigManager configManager, DatabaseManager databaseManager, PlayerDataManager playerDataManager) {
         this.plugin = plugin;
-        this.configManager = configManager;
         this.databaseManager = databaseManager;
 
         this.missionGenerator = new MissionGenerator(configManager);
